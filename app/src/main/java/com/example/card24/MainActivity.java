@@ -9,12 +9,16 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.Math;
+
 import com.singularsys.jep.EvaluationException;
 import com.singularsys.jep.Jep;
 import com.singularsys.jep.ParseException;
 
 public class MainActivity extends AppCompatActivity {
-    Button rePick; Button checkInput; Button clear;
+    Button rePick;
+    Button checkInput;
+    Button clear;
     Button left;
     Button right;
     Button plus;
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     int[] data;
     int[] card;
     int[] imageCount;
+    int backCount=0;
+    String previous="";
 
 
     @Override
@@ -34,11 +40,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         cards = new ImageButton[4];
 
-        rePick = (Button)findViewById(R.id.repick); checkInput = (Button)findViewById(R.id.checkinput); left = (Button)findViewById(R.id.left);
+        rePick = (Button)findViewById(R.id.repick);
+        checkInput = (Button)findViewById(R.id.checkinput);
+
+        left = (Button)findViewById(R.id.left);
         right = (Button)findViewById(R.id.right);
         plus = (Button)findViewById(R.id.plus);
         minus = (Button)findViewById(R.id.minus);
-        multiply = (Button)findViewById(R.id.multiply); divide = (Button)findViewById(R.id.divide);
+        multiply = (Button)findViewById(R.id.multiply);
+        divide = (Button)findViewById(R.id.divide);
         clear = (Button)findViewById(R.id.clear);
         expression = (TextView)findViewById(R.id.input);
 
@@ -66,28 +76,49 @@ public class MainActivity extends AppCompatActivity {
                 clickCard(3); }
         });
 
+
         left.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
-            expression.append("(");
+            if(expression.length()==0 || previous=="(" || previous=="*"  || previous=="/" || previous=="+" || previous=="-") {
+                expression.append("(");
+                previous="(";
+            }
         }
         });
+
+
         right.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
-            expression.append(")");
+            if(expression.length()!=0 && previous!="(" && previous!="*"  && previous!="/" && previous!="+" && previous!="-" && previous!=")") {
+                expression.append(")");
+                previous = ")";
+            }
         }
         });
         plus.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
-            expression.append("+");
+            if((expression.length()!=0 && previous!="(" && previous!="*"  && previous!="/" && previous!="+" && previous!="-") || previous==")") {
+                expression.append("+");
+                previous = "+";
+            }
         }
         });
         minus.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
-            expression.append("-");
+            if((expression.length()!=0 && previous!="(" && previous!="*"  && previous!="/" && previous!="+" && previous!="-") || previous==")") {
+                expression.append("-");
+                previous = "-";
+            }
         }
         });
         multiply.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
-            expression.append("*");
+            if((expression.length()!=0 && previous!="(" && previous!="*"  && previous!="/" && previous!="+" && previous!="-") || previous==")") {
+                expression.append("*");
+                previous = "*";
+            }
         }
         });
         divide.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
-            expression.append("/");
+            if((expression.length()!=0 && previous!="(" && previous!="*"  && previous!="/" && previous!="+" && previous!="-") || previous==")") {
+                expression.append("/");
+                previous = "/";
+            }
         }
         });
 
@@ -97,13 +128,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
         checkInput.setOnClickListener(new Button.OnClickListener() { public void onClick(View view) {
-            String inputStr = expression.getText().toString();
-            if (checkInput(inputStr)) {
-                Toast.makeText(MainActivity.this, "Correct Answer", Toast.LENGTH_SHORT).show();
-                pickCard();
-            } else {
-                Toast.makeText(MainActivity.this, "Wrong Answer", Toast.LENGTH_SHORT).show();
-                setClear();
+            if(backCount==4) {
+                String inputStr = expression.getText().toString();
+                if (checkInput(inputStr)) {
+                    Toast.makeText(MainActivity.this, "Correct Answer", Toast.LENGTH_SHORT).show();
+                    pickCard();
+                } else {
+                    Toast.makeText(MainActivity.this, "Wrong Answer", Toast.LENGTH_SHORT).show();
+                    setClear();
+                }
+            }
+            else{
+                Toast.makeText(MainActivity.this, "Select All Cards", Toast.LENGTH_SHORT).show();
             }
         }
         });
@@ -115,24 +151,39 @@ public class MainActivity extends AppCompatActivity {
         pickCard();
     }
 
-    private void initCardImage() { for (int i = 0; i < 4; i++) {
+
+
+    private void initCardImage() {
+        for (int i = 0; i < 4; i++) {
         int resID = getResources().getIdentifier("back_0","drawable","com.example.card24");
-        cards[i].setImageResource(resID); }
+        cards[i].setImageResource(resID);
+        }
     }
 
 
-    private void pickCard(){ data = new int[4]; card = new int[4];
-        card[0]=4; card[1]=5; card[2]=9; card[3]=10;
-        data[0]=4; data[1]=5; data[2]=9; data[3]=10;
+    private void pickCard(){
+        data = new int[4];
+        card = new int[4];
+        int max = 52;
+        int min = 1;
+        int range = max - min + 1;
+        for (int i = 0; i < 4; i++) {
+            int rand = (int) (Math.random() * range) + min;
+            card[i] = rand;
+            data[i] = rand%13;
+        }
         setClear();
     }
 
-    private void setClear(){ int resID;
-        expression.setText(""); for (int i = 0; i < 4; i++) {
+    private void setClear(){
+        int resID;
+        expression.setText("");
+        for (int i = 0; i < 4; i++) {
             imageCount[i] = 0;
             resID = getResources().getIdentifier("card"+card[i],"drawable", "com.example.card24");
             cards[i].setImageResource(resID);
             cards[i].setClickable(true);
+            backCount=0;
         }
     }
 
@@ -147,7 +198,9 @@ public class MainActivity extends AppCompatActivity {
             value = data[i];
             num = value.toString();
             expression.append(num);
+            previous=num.toString();
             imageCount[i] ++;
+            backCount++;
         }
     }
 
@@ -161,11 +214,13 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(MainActivity.this, "Wrong Expression", Toast.LENGTH_SHORT).show();
             return false;
-            } catch (EvaluationException e) { e.printStackTrace();
+            } catch (EvaluationException e) {
+            e.printStackTrace();
             Toast.makeText(MainActivity.this, "Wrong Expression", Toast.LENGTH_SHORT).show(); return false;
             }
             Double ca = (Double)res;
             if (Math.abs(ca - 24) < 1e-6)
-                return true; return false;
+                return true;
+            return false;
         }
 }
