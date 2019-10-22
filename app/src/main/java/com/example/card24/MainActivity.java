@@ -12,34 +12,35 @@ import android.widget.EditText;
 public class MainActivity extends AppCompatActivity {
 
     private Button launchSecondPage;
+    public static final String EXTRA_MESSAGE = "com.example.card24";
 
+    public void launchActivity(View view) {
+
+        Intent intent = new Intent(this, SecondPage.class);
+        EditText editText = (EditText) findViewById(R.id.mytextText);
+        String message = editText.getText().toString();
+        intent.putExtra(EXTRA_MESSAGE, message);
+        startActivity(intent);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
 
-
         launchSecondPage=(Button) findViewById(R.id.inputnumber);
-        EditText mEdit=(EditText) findViewById(R.id.mytextText);
-        final String content = mEdit.getText().toString(); //gets you the contents of edit text
 
-        launchSecondPage.setOnClickListener(new View.OnClickListener() {
-            @Override
+        launchSecondPage.setOnClickListener(new Button.OnClickListener() {
+
             public void onClick(View view) {
-
-                launchActivity(content);
+                launchActivity(view);
             }
         });
 
     }
 
-    private void launchActivity(String content){
-        Intent intent = new Intent(this, SecondPage.class);
-        int result = Integer.parseInt(content);
-        intent.putExtra("input_key", result);
-        startActivity(intent);
-    }
 
 
 

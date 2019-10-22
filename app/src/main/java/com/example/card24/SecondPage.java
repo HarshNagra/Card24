@@ -2,6 +2,7 @@ package com.example.card24;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -32,10 +33,10 @@ public class SecondPage extends AppCompatActivity {
     int[] imageCount;
     int backCount=0;
     String previous="";
+    int checkVal=0;
 
 
-    Bundle bundle = getIntent().getExtras();
-    int input_key = bundle.getInt("input_key");
+
 
 
 
@@ -84,6 +85,10 @@ public class SecondPage extends AppCompatActivity {
             public void onClick(View view) {
                 clickCard(3); }
         });
+
+        Intent intent = getIntent();
+        String message = ((Intent) intent).getStringExtra(MainActivity.EXTRA_MESSAGE);
+        checkVal = Integer.parseInt(message);
 
 
         left.setOnClickListener(new Button.OnClickListener(){ public void onClick(View view) {
@@ -228,7 +233,7 @@ public class SecondPage extends AppCompatActivity {
             Toast.makeText(SecondPage.this, "Wrong Expression", Toast.LENGTH_SHORT).show(); return false;
         }
         Double ca = (Double)res;
-        if (Math.abs(ca - input_key) < 1e-6)
+        if (Math.abs(ca - checkVal) < 1e-6)
             return true;
         return false;
     }
